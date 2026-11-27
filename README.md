@@ -40,8 +40,8 @@ rilancia `sh encrypt.sh`, e considera compromesse le chiavi API dentro.
 
 ## Cosa c'è dentro
 
-Un fork rinominato di ReelFactory 1.9.32 con voce diretta su ElevenLabs, stili
-propri, presentatori generati qui, pubblicazione Instagram diretta e le
-istruzioni degli agenti congelate sul disco. Gira anche senza il loro server
-(`REELSTUDIO2_STANDALONE=1`). I dettagli stanno in `docs/README.md`, che si
+Un programma per reel 9:16 con voce diretta su ElevenLabs, stili propri,
+presentatori generati qui, pubblicazione Instagram diretta e istruzioni degli
+agenti congelate sul disco. Gira senza server (`REELSTUDIO2_STANDALONE=1`). La
+provenienza del motore sta in `NOTICE`; il resto in `docs/README.md`, che si
 legge dopo aver sbloccato.
