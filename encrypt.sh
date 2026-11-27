@@ -20,7 +20,7 @@ if [ -z "$KEY" ]; then
 fi
 export KEY
 
-ITEMS="agent-skill bin config custom-styles docs extracted legacy-install scripts versions current install.json package.json update.json"
+ITEMS="agent-skill bin config custom-styles docs extracted legacy-install NOTICE LICENSE CONTRIBUTING.md scripts versions current install.json package.json update.json"
 REDUCIBLES=
 for i in $ITEMS; do [ -e "$i" ] && REDUCIBLES="$REDUCIBLES $i"; done
 
