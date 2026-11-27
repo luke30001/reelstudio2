@@ -1,7 +1,8 @@
-# tutto sta dentro il payload cifrato
+# tutto sta nei pezzi cifrati
 /*
 !/README.md
 !/decrypt.sh
 !/encrypt.sh
 !/.gitignore
-!/payload.part.*
+!/payload.index
+!/payload/

@@ -1,14 +1,17 @@
 #!/bin/sh
-# Sblocca il repository: estrae payload.tar.gz.enc nella cartella corrente.
+# Sblocca il repository: rimette i file in chiaro partendo da payload.index e
+# dai pezzi in payload/.
 #
 #   sh decrypt.sh
 #
-# Chiede la chiave se non è in REELSTUDIO2_KEY o ~/.reelstudio2.key. Se la chiave
-# è sbagliata openssl lo dice e non lascia niente a metà.
+# Chiede la chiave se non è in REELSTUDIO2_KEY o ~/.reelstudio2.key. Ogni voce
+# è verificata con SHA-256 prima di essere aperta: una parte corrotta si ferma
+# lì, senza lasciare un albero a metà.
 set -eu
 cd "$(dirname "$0")"
 
-ls payload.part.* >/dev/null 2>&1 || { echo "mancano le parti payload.part.*: sei nella cartella giusta?"; exit 1; }
+[ -f payload.index ] || { echo "manca payload.index: sei nella cartella giusta?"; exit 1; }
+[ -d payload ] || { echo "manca payload/: sei nella cartella giusta?"; exit 1; }
 
 KEY=${REELSTUDIO2_KEY:-}
 if [ -z "$KEY" ]; then
@@ -25,12 +28,28 @@ export KEY
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
-cat payload.part.* >"$TMP/joined"
-if ! openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:KEY -in "$TMP/joined" -out "$TMP/payload.tar.gz" 2>"$TMP/err"; then
-  echo "chiave sbagliata o file corrotto"
-  sed 's/^/  /' "$TMP/err" 2>/dev/null | head -3
-  exit 1
-fi
+while IFS="$(printf '\t')" read -r item parts sha; do
+  [ -n "$item" ] || continue
+  salt=$(printf '%s' "$item" | shasum -a 256 | cut -c1-32)
+  base="$TMP/$(printf '%s' "$item" | tr '/' '_')"
+  i=1
+  : >"$base.enc"
+  while [ "$i" -le "$parts" ]; do
+    n=$(printf '%03d' $((i - 1)))
+    part="payload/$(printf '%s' "$item" | tr '/' '_').enc.p$n"
+    [ -f "$part" ] || { echo "manca $part"; exit 1; }
+    cat "$part" >>"$base.enc"
+    i=$((i + 1))
+  done
+  got=$(shasum -a 256 "$base.enc" | cut -d' ' -f1)
+  [ "$got" = "$sha" ] || { echo "parte corrotta per $item"; exit 1; }
+  if ! openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -nosalt -S "$salt" \
+    -pass env:KEY -in "$base.enc" -out "$base.tar.gz" 2>"$TMP/err"; then
+    echo "chiave sbagliata o parte corrotta ($item)"
+    sed 's/^/  /' "$TMP/err" 2>/dev/null | head -3
+    exit 1
+  fi
+  tar -xzf "$base.tar.gz" -C .
+done <payload.index
 
-tar -xzf "$TMP/payload.tar.gz" -C .
 echo "sbloccato. Prossimo passo: sh scripts/install.sh, poi leggi docs/README.md"

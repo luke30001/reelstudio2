@@ -1,8 +1,11 @@
 # ReelStudio2 — repo sigillato
 
 Tutto il contenuto (programma, stili, istruzioni estratte, chiavi, documentazione)
-sta in `payload.tar.gz.enc`, cifrato con AES-256 e una chiave che **non** è qui
-dentro. Senza la chiave il repository è illeggibile.
+sta in `payload/`, cifrato con AES-256 e una chiave che **non** è qui dentro.
+Senza la chiave il repository è illeggibile.
+
+`payload/` ha un pezzo cifrato per voce e `payload.index` li elenca. Non è un
+blob unico apposta: un push porta solo le voci cambiate, non 220 MB ogni volta.
 
 ## Sbloccare
 
@@ -27,7 +30,7 @@ sh decrypt.sh          # sovrascrive col contenuto nuovo
 ```
 
 Gli aggiornamenti del programma si fanno con `sh scripts/sync-upstream.sh`, poi
-si richiude con `sh encrypt.sh` e si fa commit del solo `payload.tar.gz.enc`.
+si richiude con `sh encrypt.sh` e si fa commit di `payload/` e `payload.index`.
 
 ## Se la chiave gira
 
@@ -38,5 +41,7 @@ rilancia `sh encrypt.sh`, e considera compromesse le chiavi API dentro.
 ## Cosa c'è dentro
 
 Un fork rinominato di ReelFactory 1.9.32 con voce diretta su ElevenLabs, stili
-propri, pubblicazione Instagram diretta e le istruzioni degli agenti estratte.
-I dettagli stanno in `docs/README.md`, che si legge dopo aver sbloccato.
+propri, presentatori generati qui, pubblicazione Instagram diretta e le
+istruzioni degli agenti congelate sul disco. Gira anche senza il loro server
+(`REELSTUDIO2_STANDALONE=1`). I dettagli stanno in `docs/README.md`, che si
+legge dopo aver sbloccato.
